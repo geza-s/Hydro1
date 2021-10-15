@@ -130,16 +130,30 @@ disp('h related to return periods T based on gumbel : Ok')
 
 close all;
 
-col = ['#0072BD', '#EDB120', '#EDB120', '#EDB120','#EDB120']; 
-for i=[1:6]
-    plot(Th, weibull_table(:,2,i), 'o');
+%col = ['#0072BD', '#EDB120', '#EDB120', '#EDB120','#EDB120']; 
+
+col = [    0    0.4470    0.7410
+    0.8500    0.3250    0.0980
+    0.9290    0.6940    0.1250
+    0.4940    0.1840    0.5560
+    0.4660    0.6740    0.1880
+    0.3010    0.7450    0.9330
+    0.6350    0.0780    0.1840];
+
+for i= [1:6]
+
+    h = plot(Th, weibull_table(:,2,i), 'o');
+    set(h,'Color',col(i,:));
     hold on;
-    plot(MTT(:,7), MTT(:,i), '-')
+    
+    h = plot(MTT(:,7), MTT(:,i), '-');
+    set(h,'Color',col(i,:));
     pause(2)
 end
 xlabel('Return Period [Th]')
 ylabel('Rainfall depth [h]')
 title('Rainfall depth for each return period')
+
 
 %% Create Matric H_Gum
 H_Gum = [];
