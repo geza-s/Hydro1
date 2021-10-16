@@ -18,8 +18,9 @@ weibull_table = [];
 gumbel_table = []; %table to store gumpel method parameters
 
 %% All the computing:
+ranks = [1:size(annualMax, 1)]';
+Fh_matrix = [];
 for rainfall_duration = D
-    ranks = [1:size(annualMax, 1)]';
     h = sort(annualMax(:,rainfall_duration));
     weibull_matrix = [ranks h];
     if (length(h)-length(unique(h)) ~= 0)
@@ -29,20 +30,17 @@ for rainfall_duration = D
 
     %%% Computing the empirical freqeuencies
 
-    empirical_freq = flip(ranks)/ranks(end);
-
+    empirical_freq = flip(ranks)/ranks(end);    
     weibull_matrix = [weibull_matrix empirical_freq];
 
     %%% Computing weibul position
 
     weibull_position = ranks/(length(ranks)+1);
-
     weibull_matrix = [weibull_matrix weibull_position];
 
     %%% Computing the reduced variable
 
     yF = -log(-log(weibull_position));
-
     weibull_matrix = [weibull_matrix yF];
 
     %%% Gumpel parameters: moment methods
@@ -86,46 +84,51 @@ for rainfall_duration = D
     hold('on')
     plot(h, weibull_position, 'or', ...
         'markersize', 3)
-    legend('moments method', 'gumbel method', 'empirical values',...
-        'Location','southeast', 'Fontsize', 15);
-    title('Gumpel distributions against rainfall depth for fixed duration');
-
     pause(1)
 end
-
+%Some additional elements for the graph:
+title('Gumpel distributions against rainfall depth for fixed duration');
+xlabel('rainfall maxima h in [mm]');
+ylabel('Empirical non-exceedance probability Fh');
+legend('moments method', 'gumbel method', 'empirical values',...
+    'Location','southeast', 'Fontsize', 15);
 %%%weibull_table: [ranks h empirical_freq weibull_pos yF_reduced_variable] 
 %% Compute return period for each duration
 
-clear MTh h Ph emp_Th;
+clear h Ph emp_Th;
+
+%Th based on the weibull position
 h = weibull_table(:,2,1);
 Ph = weibull_table(:,4,1);
 emp_Th = 1./(1-Ph); %Th associated to each empirical h vector ! 
-
-MTh = []; %matrice of Th from gumpel parameters 
-for i=[1:6]
-    h = weibull_table(:,2,i);
-    alpha = gumbel_table(3,i);
-    u = gumbel_table(4,i);
-    Ph = exp(-exp(-alpha*(h-u)));
-    Th = 1./(1-Ph);
-    MTh = [MTh Th];
-end
-disp('OK')
+disp('Empirical return periods : OK')
 
 %% 
 
 MTT = [];
-T_th = [1:2:100];
+T_array = [1:2:100];
 for i=[1:6]
     alpha = gumbel_table(3,i);
     u = gumbel_table(4,i);
-    d = 1-(1./T_th);
+    d = 1-(1./T_array);
     h = u - (1/alpha)*log(-log(d));
     MTT = [MTT h'];
 end
 
-MTT = [MTT T_th'];
+MTT = [MTT T_array'];
 disp('h related to return periods T based on gumbel : Ok')
+
+%% Create Matric H_Gum
+H_Gum = [];
+Ti = [10,40,100]';
+for i=[1:6]
+    alpha = gumbel_table(3,i);
+    u = gumbel_table(4,i);
+    hi = u - (1/alpha)*log(-log(1-(1./Ti)));
+    H_Gum = [H_Gum hi];
+end
+disp('Matric with 10,40,100 return year: ok')
+
 %% plot this shit
 
 close all;
@@ -141,30 +144,21 @@ col = [    0    0.4470    0.7410
     0.6350    0.0780    0.1840];
 
 for i= [1:6]
-
-    h = plot(Th, weibull_table(:,2,i), 'o');
+    h = plot(emp_Th, weibull_table(:,2,i), 'o');
     set(h,'Color',col(i,:));
     hold on;
     
     h = plot(MTT(:,7), MTT(:,i), '-');
     set(h,'Color',col(i,:));
     pause(2)
+    
+   plot(T, H_Gum(:,i), 'ok');
 end
+
 xlabel('Return Period [Th]')
 ylabel('Rainfall depth [h]')
 title('Rainfall depth for each return period')
 
-
-%% Create Matric H_Gum
-H_Gum = [];
-Ti = [10,40,100]';
-for i=[1:6]
-    alpha = gumbel_table(3,i);
-    u = gumbel_table(4,i);
-    hi = u - (1/alpha)*log(-log(1-(1./Ti)));
-    H_Gum = [H_Gum hi];
-end
-disp('Matric with 10,40,100 return year: ok')
 %%
 T = Ti;
 save('assignment1_output_part2', 'H_Gum', 'T', 'D');
