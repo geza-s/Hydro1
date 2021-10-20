@@ -16,7 +16,6 @@ clc %clear the command window
 % import the data from previous part
 load assignment1_output_part2.mat 
 
-
 %%
 % you need DDF curves for each return period, so you will have a set of
 % parameters for each return period
@@ -34,18 +33,18 @@ load assignment1_output_part2.mat
 % -check if the best-fit errors are lower than the maximal errors given. If
 %   not, repeat the loop with a larger amount of test values
 
-c_list = linspace(1,100,50); %linspace(start, stop, nval)
-f_list = linspace(-1,1,50); %let's begin with 5 vals in each list
-e_list = linspace(0,1,50);
+c_list = linspace(1,100,100); %linspace(start, stop, nval)
+f_list = linspace(-1,1,100); %let's begin with 5 vals in each list
+e_list = linspace(0,1,100);
 
 DDF_param = [];
-Td = T;
+Td = D;
 for j = [1:3]
     err_T = 1000; %number big enough
     c = 0;
     e = 0;
     f = 0;
-    hi_gum = H_Gum(:,j);
+    hi_gum = H_Gum(j,:);
     for ci=c_list
         for fi=f_list
             for ei = e_list
@@ -60,16 +59,17 @@ for j = [1:3]
             end
         end
     end
-    disp('ok, the parameters are:')
+    val = ("For T =" + T(j) + " years, the parameters c,e and f are:");
+    disp(val)
     param_vect = [c, e, f, err_T];
-    disp( param_vect)
+    disp(param_vect(1:3))
     DDF_param = [DDF_param param_vect'];
 end
-disp('erreur pour chaque interpolation (T = 10,40,100):')
+disp('Residual sum square for each interpolation (T = 10,40,100):')
 disp(DDF_param(4,:))
 
 %% let's plot all this
-close all;
+
 col = [    0    0.4470    0.7410
     0.8500    0.3250    0.0980
     0.9290    0.6940    0.1250
@@ -78,20 +78,24 @@ col = [    0    0.4470    0.7410
     0.3010    0.7450    0.9330
     0.6350    0.0780    0.1840];
 
+figure
 for j = [1:3]
-    hi_gum = H_Gum(:,j);
-    x_durations = linspace(0,100,30);
+    hi_gum = H_Gum(j,:);
+    x_durations = linspace(0,100,200);
     parameters = DDF_param(:,j)';
     %disp(parameters);
     h_DDF = (parameters(1) .* x_durations)./(x_durations.^parameters(2) + parameters(3));
-    plot(x_durations', h_DDF, 'color', col(j,:));
+    str = ("Return period T = " + T(j) + " years");
+    plot(x_durations', h_DDF, 'color', col(j,:), 'DisplayName',str);
     hold on;
-    plot(T, hi_gum, 'o', 'color', col(j,:));
+    oh = plot(D, hi_gum, 'o', 'color', col(j,:));
+    oh.Annotation.LegendInformation.IconDisplayStyle = 'off';
     hold on;
 end
+grid on;
 title('DDF curves for each return period given');
-xlabel('Durations')
+xlabel('Durations [hours]')
 ylabel('Rainfall depth [mm]')
-legend('DDF interpolation','values from gumpel values')
-
+%legend('DDF interpolation','values from Gumbel approximation')
+legend('Location', 'South East')
 
