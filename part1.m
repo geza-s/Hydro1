@@ -51,10 +51,12 @@ for i = (1:datasize)
         end
     end
 end 
+
+figure 
 bar(years,annual_rainfall)
-title('Annual rainfall','FontSize',15,'FontWeight','bold')
-xlabel('Years','FontSize',10,'FontWeight','bold', 'fontsize', 14)
-ylabel('Rainfall in [mm]','FontSize',10,'FontWeight','bold', 'fontsize', 14)
+title('Annual rainfall','FontSize',16,'FontWeight','bold')
+xlabel('Year','FontSize',12,'FontWeight','bold', 'fontsize', 14)
+ylabel('Rainfall in [mm]','FontSize',12,'FontWeight','bold', 'fontsize', 14)
 ax.xticks = years;
 xtickangle(45)
 

@@ -85,17 +85,19 @@ for j = [1:3]
     parameters = DDF_param(:,j)';
     %disp(parameters);
     h_DDF = (parameters(1) .* x_durations)./(x_durations.^parameters(2) + parameters(3));
-    str = ("Return period T = " + T(j) + " years");
-    plot(x_durations', h_DDF, 'color', col(j,:), 'DisplayName',str);
+    str = ("DDF, Return period T = " + T(j) + " [y]");
+    plot(x_durations', h_DDF, 'LineWidth', 1.5, 'color', col(j,:), 'DisplayName',str);
     hold on;
-    oh = plot(D, hi_gum, 'o', 'color', col(j,:));
-    oh.Annotation.LegendInformation.IconDisplayStyle = 'off';
+    str2 = ("Gumbel values, duration T = " + T(j) + " [y]");
+    oh = plot(D, hi_gum, 'o', 'color', col(j,:), 'DisplayName',str2);
+    %oh.Annotation.LegendInformation.IconDisplayStyle = 'off';
     hold on;
 end
+
 grid on;
 title('DDF curves for each return period given');
 xlabel('Durations [hours]')
 ylabel('Rainfall depth [mm]')
 %legend('DDF interpolation','values from Gumbel approximation')
-legend('Location', 'South East')
+legend('Location', 'South East', 'Fontsize', 11)
 

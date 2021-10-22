@@ -17,9 +17,21 @@ load assignment1_output_part1.mat
 weibull_table = [];
 gumbel_table = []; %table to store gumbel method parameters
 
-%% All the computing:
+%% All the computing and plotting: 
+
+figure( 'position', [300, 50, 900, 400])
+col = [    0    0.4470    0.7410
+    0.8500    0.3250    0.0980
+    0.9290    0.6940    0.1250
+    0.4940    0.1840    0.5560
+    0.4660    0.6740    0.1880
+    0.3010    0.7450    0.9330
+    0.6350    0.0780    0.1840]; % colors for the graphes 
+
+
 ranks = [1:size(annualMax, 1)]';
 Fh_matrix = [];
+posR = 0;
 for rainfall_duration = D
     h = sort(annualMax(:,rainfall_duration));
     weibull_matrix = [ranks h];
@@ -71,21 +83,26 @@ for rainfall_duration = D
     %gumbel_gm = exp(-exp(-gumbel_table(3,3)*(x_h-gumbel_table(4,3))));
     gumbel_mm = exp(-exp(-alpha_mm*(x_h-u_mm)));
     gumbel_gm = exp(-exp(-alpha_YF*(x_h-u_YF)));
-
-    plot(x_h, gumbel_mm, 'k')
+    
+    %strMM =("Moments method, duration = " + rainfall_duration + " H");
+    %plot(x_h, gumbel_mm, 'k', displayName = )
+    %hold('on')
+    posR = posR + 1;
+    strGM =("Gumbel method, duration = " + rainfall_duration + " [h]");
+    plot(x_h, gumbel_gm, 'LineWidth', 1.5, 'DisplayName', strGM, 'Color', col(posR,:))
     hold('on')
-    plot(x_h, gumbel_gm, 'c')
-    hold('on')
-    plot(h, weibull_position, 'or', ...
-        'markersize', 3)
+    strEF =("Empirical frequency, duration = " + rainfall_duration + " [h]");
+    plot(h, weibull_position, 'o', 'markersize', 3, 'Color', col(posR,:), ...
+        'DisplayName', strEF);
     pause(1)
 end
+
 %Some additional elements for the graph:
 title('Fitted Cumulative Gumbel Distribution', 'fontsize', 14);
 xlabel('rainfall maxima h in [mm]', 'fontsize', 14);
 ylabel('non-exceedance probability Fh', 'fontsize', 14);
-legend('moments method', 'gumbel method', 'empirical values',...
-    'Location','southeast', 'Fontsize', 14);
+%legend('moments method', 'gumbel method', 'empirical values',...
+legend('Location','eastoutside', 'Fontsize', 12);
 %%%weibull_table: [ranks h empirical_freq weibull_pos yF_reduced_variable] 
 %% Compute return period for each duration
 
@@ -95,12 +112,13 @@ clear h Ph emp_Th;
 h = weibull_table(:,2,1);
 Ph = weibull_table(:,4,1);
 emp_Th = 1./(1-Ph); %Th associated to each empirical h vector ! 
-disp('Empirical return periods : OK')
+
+%disp('Empirical return periods : OK') %debugging
 
 %% 
 
 MTT = [];
-T_array = [1:2:100];
+T_array = [1:1:100];
 for i=[1:6]
     alpha = gumbel_table(3,i);
     u = gumbel_table(4,i);
@@ -110,7 +128,8 @@ for i=[1:6]
 end
 
 MTT = [MTT T_array'];
-disp('h related to return periods T based on gumbel : Ok')
+
+%disp('h related to return periods T based on gumbel : Ok') %debugging
 
 %% Create Matric H_Gum
 H_Gum = [];
@@ -125,40 +144,41 @@ disp('Matric with 10,40,100 return year: ok')
 
 %% plot this 
 
-close all;
+figure( 'position', [300, 300, 850, 500])
+ % new figure for the second plot 
 
 %col = ['#0072BD', '#EDB120', '#EDB120', '#EDB120','#EDB120']; 
 
-col = [    0    0.4470    0.7410
-    0.8500    0.3250    0.0980
-    0.9290    0.6940    0.1250
-    0.4940    0.1840    0.5560
-    0.4660    0.6740    0.1880
-    0.3010    0.7450    0.9330
-    0.6350    0.0780    0.1840];
-
 for i= [1:6]
-    h = plot(emp_Th, weibull_table(:,2,i), 'o');
+    strEmp = ("Empirical values, duration = " + D(i) + " [h]");
+    h = plot(emp_Th, weibull_table(:,2,i), 'o', 'markersize', 5, 'DisplayName', strEmp);
     set(h,'Color',col(i,:));
     hold on;
     
-    h = plot(MTT(:,7), MTT(:,i), '-');
+    strG = ("Gumbel approx., duration = " + D(i)+ " [h]");
+    h = plot(MTT(:,7), MTT(:,i), '-','LineWidth',1.5, 'DisplayName', strG);
     set(h,'Color',col(i,:));
-    pause(2)
     
-   plot(Ti, H_Gum(:,i), 'ok', 'LineWidth', 1);
-   
+    pHgum = plot(Ti, H_Gum(:,i), 'ok');
+    if (i == 6)
+        pHgum.DisplayName = "Selected values for DDF curves";
+    else 
+        pHgum.Annotation.LegendInformation.IconDisplayStyle = 'off';
+    end
+    pause(1)
 end
 
 xlabel('Return Period Th [years]','fontsize',14)
 ylabel('Rainfall depth h [mm]','fontsize',14)
 title('Rainfall depth for each duration','fontsize',14)
 
-legend('h[mm] against empirical return periods', 'h[mm] with Gumbel distribution', 'Output Matrix: H Gum',...
-    'Location','southeast', 'Fontsize', 14);
+legend('Location', 'eastoutside', 'Fontsize', 12)
+%legend('h[mm] against empirical return periods', 'h[mm] with Gumbel distribution', 'Output Matrix: H Gum','Location','southeast', 'Fontsize', 14);
 
-%%
+%% Saving output for next part
+
 T = Ti;
 save('assignment1_output_part2', 'H_Gum', 'T', 'D');
-disp('H_Gum, T and D saved')
+
+disp('H_Gum, T and D saved in ouput file.')
 
