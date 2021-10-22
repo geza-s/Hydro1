@@ -25,6 +25,7 @@ h = T.rre150h0;    %rre150h0 is the MeteoSwiss code for hourly rainfall depth [m
 t = datetime(T.time,'InputFormat','yyyyMMddHH'); %convert to datetime (can be slow)
 m = month(t); %gives a value in 1-12 to indicate the month of each date
 y = year(t); %gives the year of each date
+d = day(t);
 
 % fix empty values (which appear as NaN values in the Matlab)
 emptyValues = isnan(h); %logical test to tell whether a value is missing or not
@@ -35,35 +36,31 @@ fprintf('%i empty values\n', sum(emptyValues)); %display how many missing values
 %% -------------------------------------------------------------------------
 % # 4: Plot with annual rainfall over the years
 % -------------------------------------------------------------------------
-% ...
-datadim=  size(h)
-datasize = datadim(1)
+
+datadim=  size(h);
+datasize = datadim(1);
 years = unique(y); 
-sz = (size(years))
-nb_annee = sz(1)
+sz = (size(years));
+nb_annee = sz(1);
 annual_rainfall = zeros(nb_annee,1); 
 
 for i = (1:datasize)
     for n = (1:nb_annee)
         if years(n)== y(i)
-            annual_rainfall(n)= annual_rainfall(n)+ h(i)
+            annual_rainfall(n)= annual_rainfall(n)+ h(i);
         end
     end
 end 
 bar(years,annual_rainfall)
 title('Annual rainfall','FontSize',15,'FontWeight','bold')
-xlabel('Years','FontSize',10,'FontWeight','bold')
-ylabel('Rainfall in [mm]','FontSize',10,'FontWeight','bold')
-ax.xticks = years
+xlabel('Years','FontSize',10,'FontWeight','bold', 'fontsize', 14)
+ylabel('Rainfall in [mm]','FontSize',10,'FontWeight','bold', 'fontsize', 14)
+ax.xticks = years;
 xtickangle(45)
 
 
-
-
-
-
 %% 
-% 5-8 : Computing and Plotting the 
+% 5-8 : Computing and Plotting 
 
 
 annualMax = zeros(39,6);
@@ -97,6 +94,10 @@ for k = D
         end
 end
 
+% -------------------------------------------------------------------------
+%% # 8: save the output
+% useful functions: save
+
 
 save('assignment1_output_part1', 'annualMax', 'D')
 
@@ -109,13 +110,4 @@ save('assignment1_output_part1', 'annualMax', 'D')
 
 
 
-
-
-% -------------------------------------------------------------------------
-% # 8: save the output
-% useful functions: save
-% -------------------------------------------------------------------------
-% when you are confident about your results, save the variables AnnualMax
-% and D by uncommenting the following line: 
-% save('assignment1_output_part1.mat','D','H_Gum');
 
