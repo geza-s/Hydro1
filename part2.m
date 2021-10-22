@@ -15,7 +15,7 @@ clc %clear the command window
 % import the data from Part1 using the function load
 load assignment1_output_part1.mat
 weibull_table = [];
-gumbel_table = []; %table to store gumpel method parameters
+gumbel_table = []; %table to store gumbel method parameters
 
 %% All the computing:
 ranks = [1:size(annualMax, 1)]';
@@ -43,16 +43,10 @@ for rainfall_duration = D
     yF = -log(-log(weibull_position));
     weibull_matrix = [weibull_matrix yF];
 
-    %%% Gumpel parameters: moment methods
+    %%% gumbel parameters: moment methods
 
     mh = mean(h);
     sh = std(h);
-
-    % WITH MATH TOOLBOX :
-    %syms u alpha
-    %eqns = [ u + 0.5772/alpha == m, pi/(sqrt(6)*alpha)  == s];
-    %vars = [u alpha];
-    %[solu, sola] = solve(eqns,vars);
 
     alpha_mm= pi/(sh * sqrt(6));
     u_mm = mh-0.5772/alpha_mm;
@@ -73,25 +67,25 @@ for rainfall_duration = D
     weibull_table = cat(3, weibull_table, weibull_matrix);
     %%% plottting comparision of gumbel functions
     x_h = [1:120];
-    %gumpel_mm = exp(-exp(-gumbel_table(1,3)*(x_h-gumbel_table(2,3))));
-    %gumpel_gm = exp(-exp(-gumbel_table(3,3)*(x_h-gumbel_table(4,3))));
-    gumpel_mm = exp(-exp(-alpha_mm*(x_h-u_mm)));
-    gumpel_gm = exp(-exp(-alpha_YF*(x_h-u_YF)));
+    %gumbel_mm = exp(-exp(-gumbel_table(1,3)*(x_h-gumbel_table(2,3))));
+    %gumbel_gm = exp(-exp(-gumbel_table(3,3)*(x_h-gumbel_table(4,3))));
+    gumbel_mm = exp(-exp(-alpha_mm*(x_h-u_mm)));
+    gumbel_gm = exp(-exp(-alpha_YF*(x_h-u_YF)));
 
-    plot(x_h, gumpel_mm, 'k')
+    plot(x_h, gumbel_mm, 'k')
     hold('on')
-    plot(x_h, gumpel_gm, 'c')
+    plot(x_h, gumbel_gm, 'c')
     hold('on')
     plot(h, weibull_position, 'or', ...
         'markersize', 3)
     pause(1)
 end
 %Some additional elements for the graph:
-title('Gumpel distributions against rainfall depth for fixed duration');
-xlabel('rainfall maxima h in [mm]');
-ylabel('Empirical non-exceedance probability Fh');
+title('Fitted Cumulative Gumbel Distribution', 'fontsize', 14);
+xlabel('rainfall maxima h in [mm]', 'fontsize', 14);
+ylabel('non-exceedance probability Fh', 'fontsize', 14);
 legend('moments method', 'gumbel method', 'empirical values',...
-    'Location','southeast', 'Fontsize', 15);
+    'Location','southeast', 'Fontsize', 14);
 %%%weibull_table: [ranks h empirical_freq weibull_pos yF_reduced_variable] 
 %% Compute return period for each duration
 
@@ -129,7 +123,7 @@ for i=[1:6]
 end
 disp('Matric with 10,40,100 return year: ok')
 
-%% plot this shit
+%% plot this 
 
 close all;
 
@@ -152,12 +146,16 @@ for i= [1:6]
     set(h,'Color',col(i,:));
     pause(2)
     
-   plot(T, H_Gum(:,i), 'ok');
+   plot(Ti, H_Gum(:,i), 'ok', 'LineWidth', 1);
+   
 end
 
-xlabel('Return Period [Th]')
-ylabel('Rainfall depth [h]')
-title('Rainfall depth for each return period')
+xlabel('Return Period Th [years]','fontsize',14)
+ylabel('Rainfall depth h [mm]','fontsize',14)
+title('Rainfall depth for each duration','fontsize',14)
+
+legend('h[mm] against empirical return periods', 'h[mm] with Gumbel distribution', 'Output Matrix: H Gum',...
+    'Location','southeast', 'Fontsize', 14);
 
 %%
 T = Ti;
