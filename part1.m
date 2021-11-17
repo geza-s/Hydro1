@@ -17,12 +17,17 @@ load event_1
 load event_2
 
 % for event 3, use the DDF curve from previous assignment to find
-% precipitation DEPTH corresponding to: a return period of 200 years and
+% precipitation DEPTH corresponding to: a return period of 100 years and
 % duration of 4 hours
+duration = 4; %100 years return period but 4 hr duration
+load ddf100_param.mat;
+h_100 = (ddf100_param(1) .* duration)./(duration.^ddf100_param(2) + ddf100_param(3));
+event_3 = h_100*[1,1,1,1];
 
 % NOTE: it can be useful to insert the three events into a 4x3 matrix
 
-
+events = [event_1 event_2 event_3'];
+clear event_1 event_2 event_3;
 % -------------------------------------------------------------------------
 % #2-3: IMPLEMENTATION OF CURVE NUMBER METHOD
 % -------------------------------------------------------------------------
