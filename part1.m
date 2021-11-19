@@ -22,28 +22,67 @@ load event_2
 duration = 4; %100 years return period but 4 hr duration
 load ddf100_param.mat;
 h_100 = (ddf100_param(1) .* duration)./(duration.^ddf100_param(2) + ddf100_param(3));
-event_3 = h_100*[1,1,1,1];
+event_3 = round(h_100,1)*[1,1,1,1];
 
 % NOTE: it can be useful to insert the three events into a 4x3 matrix
 
 events = [event_1 event_2 event_3'];
+leg = [ " event 1", "event 2", "event 3"];
 clear event_1 event_2 event_3;
 % -------------------------------------------------------------------------
-% #2-3: IMPLEMENTATION OF CURVE NUMBER METHOD
+%% #2-3: IMPLEMENTATION OF CURVE NUMBER METHOD
 load SCSpars.mat
-% average CN for the catchment.
-average_CN = CN*(percentages/100)
-%potential maximum soil moisture retention S of the catchment
-S= 25400/average_CN - 254 % units:[mm]
-% cumulative precipitation (P [mm]);
-%The initial abstraction (Ia [mm]);
-% The cumulative infiltration (Fa [mm]);
-% The cumulative effective precipitation (Pe [mm]);
-% The infiltration intensity (I [mm/h]);
-% The effective rainfall intensity (Je [mm/h]);
 
+% average CN for the catchment.
+average_CN = CN*percentages/100;
+
+%potential maximum soil moisture retention S of the catchment
+S= 25400/average_CN - 254; % units:[mm]
+
+%% cumulative precipitation (P [mm]);
+Pt = tril(ones(4))*events;
+figure
+plot(Pt, '-o')
+title("Cumulative precipitation")
+ylabel('P [mm]')
+xlabel('timestep [hour]')
+legend(leg)
+%% The initial abstraction (Ia [mm]);
+Ia = 0.2 * S;
+
+%% The cumulative infiltration (Fa [mm]);
+Fa = Pt - ((Pt - Ia).*(Pt-Ia))./(Pt + 0.8*S);
+figure
+plot(Fa, '-o')
+title("Cumulative Infiltration Fa(t)")
+ylabel('Fa [mm]')
+xlabel('timestep [hour]')
+legend(leg)
+%% The cumulative effective precipitation (Pe [mm]);
+Pet = Pt - Fa;
+figure 
+plot(Pet, '-o')
+title("Cumulative effective precipitation")
+ylabel('Pe [mm]')
+xlabel('timestep [hour]')
+legend(leg)
+%% The infiltration intensity (I [mm/h]);
+
+M = diag(ones([4 1])) + diag(-ones([3 1]),-1);
+M = M;
+i = M * Fa;
+plot(i, '-o')
+title("Infiltration intensity")
+legend(leg)
+%% The effective rainfall intensity (Je [mm/h]);
+
+Je1 = M * Pet;
+plot(Je1, '-o')
+title("Effective rainfall intensity")
+ylabel("Je [mm/h]")
+legends(leg)
 % -------------------------------------------------------------------------
-% NB: the CN method uses cumulative fluxes
+%% NB: the CN method uses cumulative fluxes
 
 
 
