@@ -30,6 +30,18 @@ events = [event_1 event_2 event_3'];
 clear event_1 event_2 event_3;
 % -------------------------------------------------------------------------
 % #2-3: IMPLEMENTATION OF CURVE NUMBER METHOD
+load SCSpars.mat
+% average CN for the catchment.
+average_CN = CN*(percentages/100)
+%potential maximum soil moisture retention S of the catchment
+S= 25400/average_CN - 254 % units:[mm]
+% cumulative precipitation (P [mm]);
+%The initial abstraction (Ia [mm]);
+% The cumulative infiltration (Fa [mm]);
+% The cumulative effective precipitation (Pe [mm]);
+% The infiltration intensity (I [mm/h]);
+% The effective rainfall intensity (Je [mm/h]);
+
 % -------------------------------------------------------------------------
 % NB: the CN method uses cumulative fluxes
 
