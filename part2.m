@@ -9,15 +9,18 @@ clear variables
 close all
 
 % -------------------------------------------------------------------------
-% #1: Prepare rainfall event
+%% #1: Prepare rainfall event
 % -------------------------------------------------------------------------
 
 % Load the matrix with J, Je, I from part 1
 load output_part1.mat
+
 dt_h = 1; %hourly time steps
 Je_h = Je; %rename to stress that it is Je at hourly time steps
 
-% display total volume Je_h
+clear Je;
+
+%% display total volume Je_h
 disp(' ')
 fprintf('Volume Je = %.3f mm\n',sum(Je_h)*dt_h)
 

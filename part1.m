@@ -70,21 +70,21 @@ legend(leg)
 
 M = diag(ones([4 1])) + diag(-ones([3 1]),-1);
 M = M;
-i = M * Fa;
-plot(i, '-o')
+I = M * Fa;
+plot(I, '-o')
 title("Infiltration intensity")
 legend(leg)
 %% The effective rainfall intensity (Je [mm/h]);
 
-Je1 = M * Pet;
-plot(Je1, '-o')
+Je = M * Pet;
+plot(Je, '-o')
 title("Effective rainfall intensity")
 ylabel("Je [mm/h]")
-legends(leg)
+legend(leg)
 % -------------------------------------------------------------------------
 %% NB: the CN method uses cumulative fluxes
-
-
+J = events;
+save("output_part1.mat", "J", "Je", "I") 
 
 
 
