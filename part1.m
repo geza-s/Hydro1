@@ -39,45 +39,48 @@ average_CN = CN*percentages/100;
 %potential maximum soil moisture retention S of the catchment
 S= 25400/average_CN - 254; % units:[mm]
 
-%% cumulative precipitation (P [mm]);
+%% a) Cumulative precipitation (P [mm]);
 Pt = tril(ones(4))*events;
 figure
-plot(Pt, '-o')
+%plot(Pt, '-o')
+bar(Pt)
 title("Cumulative precipitation")
 ylabel('P [mm]')
 xlabel('timestep [hour]')
 legend(leg)
-%% The initial abstraction (Ia [mm]);
+%% b) The initial abstraction (Ia [mm]);
 Ia = 0.2 * S;
 
-%% The cumulative infiltration (Fa [mm]);
+%% c) The cumulative infiltration (Fa [mm]);
 Fa = Pt - ((Pt - Ia).*(Pt-Ia))./(Pt + 0.8*S);
 figure
-plot(Fa, '-o')
+%plot(Fa, '-o')
+bar(Fa)
 title("Cumulative Infiltration Fa(t)")
 ylabel('Fa [mm]')
 xlabel('timestep [hour]')
 legend(leg)
-%% The cumulative effective precipitation (Pe [mm]);
+%% d) The cumulative effective precipitation (Pe [mm]);
 Pet = Pt - Fa;
 figure 
-plot(Pet, '-o')
+%plot(Pet, '-o')
+bar(Pet(:,2))
 title("Cumulative effective precipitation")
 ylabel('Pe [mm]')
 xlabel('timestep [hour]')
 legend(leg)
-%% The infiltration intensity (I [mm/h]);
+%% e) The infiltration intensity (I [mm/h]);
 
 M = diag(ones([4 1])) + diag(-ones([3 1]),-1);
-M = M;
 I = M * Fa;
-plot(I, '-o')
+bar(I)
 title("Infiltration intensity")
 legend(leg)
-%% The effective rainfall intensity (Je [mm/h]);
+%% f) The effective rainfall intensity (Je [mm/h]);
 
 Je = M * Pet;
-plot(Je, '-o')
+%plot(Je, '-o')
+bar(Je)
 title("Effective rainfall intensity")
 ylabel("Je [mm/h]")
 legend(leg)
