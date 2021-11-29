@@ -36,8 +36,40 @@ Je = interp1(t_Je_h, Je_h, t_Je ,'previous','extrap'); %rainfall intensity in mm
 % -------------------------------------------------------------------------
 % #2: GENERATE THE INSTANTANEOUS UNIT HYDROGRAPHS (IUH)
 % -------------------------------------------------------------------------
+%% Watershed IUH
+load IUHpars.mat % par_shape = k, par_scale = theta
+x = 0:30;
 
+fun = @(x) x.^(0.2).*exp(-x);
+%Evaluate the integral from x=0 to x=Inf.
+gammaK = integral(fun,0,Inf);
 
+IUHw = (1/(gammaK * par_scale^par_shape)) .* x.^(par_shape-1) .* exp(-x/par_scale);
+
+%IUHw = zeros(1,20);
+%for k = 1:19
+%    IUHw(k) = sum(gammaf(10*k: 10*k + 9))/10;
+%end
+
+figure
+bar(IUHw)
+title("Watershed IUH")
+
+disp("Surface under curve of IUHw: " + sum(IUHw));
+
+%% Channel IUH
+
+c = 0.3*3600; %m/s * s/h ;celerity
+D = 10^6; %m^2/h ;hydrodynamic dispersion
+L = 7 * 1000; %km -> m
+
+t = 1:20;
+IUHc = L./(sqrt(4*pi*D).*t.^(3/2)) .* exp((-(L-c*t).^2)./(4*D.*t));
+figure 
+bar(IUHc)
+title("Channel IUH")
+
+disp("Surface under curve of IUHw: " + sum(IUHc));
 
 
 
