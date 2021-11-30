@@ -22,6 +22,7 @@ load event_2
 duration = 4; %100 years return period but 4 hr duration
 load ddf100_param.mat;
 h_100 = (ddf100_param(1) .* duration)./(duration.^ddf100_param(2) + ddf100_param(3));
+h_100 = h_100/4; %because it's a total mm over 4hr
 event_3 = round(h_100,1)*[1,1,1,1];
 
 % NOTE: it can be useful to insert the three events into a 4x3 matrix
@@ -52,19 +53,26 @@ legend(leg)
 Ia = 0.2 * S;
 
 %% c) The cumulative infiltration (Fa [mm]);
-Fa = Pt - ((Pt - Ia).*(Pt-Ia))./(Pt + 0.8*S);
+Fa = S*(Pt-Ia)./(Pt-Ia+S);
+Fa(Fa<0) = 0;
+%We have to check that there is no more infiltration than Pt!!!!!
+
 figure
-%plot(Fa, '-o')
+%plot(Fa, '-o') 
 bar(Fa)
-title("Cumulative Infiltration Fa(t)")
 ylabel('Fa [mm]')
 xlabel('timestep [hour]')
-legend(leg)
+title("Cumulative Infiltration Fa(t)")
+legend([leg,leg])
+
+
 %% d) The cumulative effective precipitation (Pe [mm]);
-Pet = Pt - Fa;
+Pet = Pt-Ia-Fa;
+Pet(Pet<0)=0;
+
 figure 
 %plot(Pet, '-o')
-bar(Pet(:,2))
+bar(Pet)
 title("Cumulative effective precipitation")
 ylabel('Pe [mm]')
 xlabel('timestep [hour]')

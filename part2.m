@@ -52,7 +52,7 @@ IUHw = (1/(gammaK * par_scale^par_shape)) .* x.^(par_shape-1) .* exp(-x/par_scal
 %end
 
 figure
-bar(IUHw)
+area(IUHw,'FaceAlpha', 0.5)
 title("Watershed IUH")
 
 disp("Surface under curve of IUHw: " + sum(IUHw)*dt);
@@ -66,7 +66,7 @@ L = 7 * 1000; %km -> m
 t = 1:dt:20;
 IUHc = L./(sqrt(4*pi*D).*t.^(3/2)) .* exp((-(L-c*t).^2)./(4*D.*t));
 figure 
-bar(IUHc)
+area(IUHc,'FaceColor', '#D95319','FaceAlpha', 0.5)
 title("Channel IUH")
 
 disp("Surface under curve of IUHc: " + sum(IUHc)*dt);
@@ -74,71 +74,112 @@ disp("Surface under curve of IUHc: " + sum(IUHc)*dt);
 
 figure
 IUHcx = [IUHc, zeros(1,length(x)-length(IUHc))];
-bar(x, [ IUHw; IUHcx])
+area(x, IUHcx, 'FaceAlpha', 0.5)
+hold on
+area(x, IUHw, 'FaceAlpha', 0.5)
 title("Watershed and channel IUH")
 legend("IUHw", "IUHc")
 
 %% explicit convolution IUHw and Je
+Qw = [];
+Qc = [];
+for event = [1,2,3];
+    Jei = Je(:,event);
 
-event = 1; %event number 1,2 or 3
-Jei = Je(:,event);
+    N = length(IUHw);
+    M = length(Je);
 
-N = length(IUHw);
-M = length(Je);
+    Qwi = zeros([1, N+M]);
 
-Qw = zeros([1, N+M]);
-
-%%convolution
-for n = 1:N+M
-    for m = 1:M
-        %disp("n :" + n + " and m =" + m);
-        if ((n>m) && n-m+1<N)
-            Qw(n) = Qw(n) + Jei(m)*IUHw(n-m+1);
+    %%convolution
+    for n = 1:N+M
+        for m = 1:M
+            %disp("n :" + n + " and m =" + m);
+            if ((n>m) && n-m+1<N)
+                Qwi(n) = Qwi(n) + Jei(m)*dt*IUHw(n-m+1);
+            end
         end
     end
-end
 
-SJei = sum(Jei)*dt; %% la quantité total d'eau tombé
-SJei_waited = sum(IUHw)*dt * SJei*dt; %%ce qu'on devrait attendre au vu de l'approximation du IUHw
-SQw = sum(Qw)*dt*dt; %%total de pluie qu'on obtient à la sortie
-disp("With a IUHw surface of " + sum(IUHw)*dt + " we should get a total water of " + SJei_waited + " but by the convolution we have : " + SQw + " !")
-disp("Less than " + round(1-SQw/SJei_waited, 3)*100 + "% is lost through convulotion algorithm")
+    SJei = sum(Jei); %% la quantité total d'eau tombé
+    SJei_waited = sum(IUHw)*dt*SJei; %%ce qu'on devrait attendre au vu de l'approximation du IUHw
+    SQw = sum(Qwi); %%total de pluie qu'on obtient à la sortie
+    disp("With a IUHw surface of " + sum(IUHw)*dt + " we should get a total water of " + SJei_waited + " but by the convolution we have : " + SQw + " !")
+    disp("Less than " + round(1-SQw/SJei_waited, 3)*100 + "% is lost through convulotion algorithm")
 
-figure 
-bar(Jei)
-hold on
-bar(Qw)
-hold on
-bar(IUHw)
-legend("Jei", "Qw", "IUHw")
-title("Convolution of IUH and Je of event " + event)
+    figure 
+    
+    subplot(2,1,1)
+    
+    area(Qwi,'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
+    hold on
+    area(Jei,'FaceColor', '#7E2F8E', 'FaceAlpha', 0.7)
+    hold on
+    area(IUHw,'FaceColor','#EDB120', 'FaceAlpha', 0.8)
+    legend("Qw", "Jei", "IUHw")
+    title("Convolution of IUH and Je of event " + event)
 
-%% Channel IUH convolution
+    %%% Channel IUH convolution
 
-N = length(IUHc);
-M = length(Qw);
+    N = length(IUHc);
+    M = length(Qwi);
 
-Qc = zeros([1, N+M]);
+    Qci = zeros([1, N+M]);
 
-%%convolution
-for n = 1:N+M
-    for m = 1:M
-        %disp("n :" + n + " and m =" + m);
-        if ((n>m) && n-m+1<N)
-            Qc(n) = Qc(n) + Qw(m)*IUHc(n-m+1);
+    for n = 1:N+M
+        for m = 1:M
+            %disp("n :" + n + " and m =" + m);
+            if ((n>m) && n-m+1<N)
+                Qci(n) = Qci(n) + Qwi(m)*dt*IUHc(n-m+1);
+            end
         end
     end
+
+    SQc = sum(Qci);
+    disp("Surface under Qw :" + SQw + " and under Qc :" + SQc)
+
+    %%%% convolution 2 plot to verify 
+
+    subplot(2,1,2) 
+    area(Qci,'FaceColor', '#D95319' ,'FaceAlpha', 0.5)
+    hold on
+    area(Qwi,'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
+    hold on
+    area(IUHc,'FaceColor','#EDB120', 'FaceAlpha', 0.8)
+    legend("Qc", "Qw", "IUHc")
+    title("Convolution of IUHc and Qw of event " + event)
+    
+    %%%saving final data we need
+    Qw = [Qw Qwi'];
+    Qc = [Qc Qci'];
+    
 end
 
-SQc = sum(Qc)*dt;
-disp("Surface under Qw :" + SQw + " and under Qc :" + SQc)
+%% test figure Fa PT reversed double plot
+for event = [1,2,3]
+    figure
+    %plot(Fa, '-o')
+    yyaxis left
+    area(Je(:,event),'FaceColor', '#7E2F8E', 'FaceAlpha', 0.7)
+    ylabel('Effectiv Precipitation [mm]')
+    ylim([0,max(Je(:,event))+3])
+    ax = gca;
+    ax.YDir = "reverse";
+    ax.YColor = '#7E2F8E';
 
 
-figure 
-bar(Qc)
-hold on
-bar(Qw)
-hold on
-bar(IUHc)
-legend("Qc", "Qw", "IUHc")
-title("Convolution of IUHc and Qw of event " + event)
+    yyaxis right
+    area(Qw(:,event),'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
+    hold on
+    area(Qc(:,event),'FaceColor', '#D95319' ,'FaceAlpha', 0.5)
+    ylabel('Q [mm]')
+    ax.YColor = '#0072BD';
+
+    xlabel("timestep in " + 1/dt + "[hour]")
+    legend(["Je", "Qw", "Qc"])
+    title("Convolution of IUHc and Qw of event " + event)
+end
+
+
+
+
