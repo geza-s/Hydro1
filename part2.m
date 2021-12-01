@@ -83,7 +83,7 @@ legend("IUHw", "IUHc")
 %% explicit convolution IUHw and Je
 Qw = [];
 Qc = [];
-for event = [1,2,3];
+for event = [1,2,3]
     Jei = Je(:,event);
 
     N = length(IUHw);
@@ -175,11 +175,34 @@ for event = [1,2,3]
     ylabel('Q [mm]')
     ax.YColor = '#0072BD';
 
-    xlabel("timestep in " + 1/dt + "[hour]")
+    xlabel("timestep in " + dt + "[hour]")
     legend(["Je", "Qw", "Qc"])
     title("Convolution of IUHc and Qw of event " + event)
 end
 
+%% channel maxima's
 
+MaxC = [max(Qc); 0 0 0];
+for i = 1:length(Qc)
+   if Qc(i,1) == MaxC(1,1)
+       MaxC(2,1) = i*dt;
+       disp("Maximal Q of channel for event 1:")
+       disp(MaxC(1,1) + "[mm] after " + MaxC(2,1) + " [hours] ")
 
+   end
+   if Qc(i,2) == MaxC(1,2)
+       MaxC(2,2) = i*dt;
+       disp("Maximal Q of channel for event 2: ")
+       disp(MaxC(1,2) + "[mm] after " + MaxC(2,2) + " [hours]")
+   end
+   if Qc(i,3) == MaxC(1,3)
+       MaxC(2,3) = i*dt;
+       disp("Maximal Q of channel for event 3: ")
+       disp(MaxC(1,3) + "[mm] after " + MaxC(2,3) + " [hours]")
+   end
+   
+end
 
+%% saving results
+
+save("output_part2.mat", "dt", "IUHw") 
