@@ -52,10 +52,12 @@ IUHw = (1/(gammaK * par_scale^par_shape)) .* x.^(par_shape-1) .* exp(-x/par_scal
 %end
 
 figure
-area(IUHw,'FaceAlpha', 0.5)
+area(x,IUHw,'FaceAlpha', 0.5)
 title("Watershed IUH")
+xlabel("Time [h]")
+ylabel("Proportion of unit discharge [mm/h]") %Important to understand that the values are per hour !!
 
-disp("Surface under curve of IUHw: " + sum(IUHw)*dt);
+disp("Surface under curve of IUHw: " + sum(IUHw)*dt); %Sum of all the small rectangles 
 
 %% Channel IUH
 
@@ -63,20 +65,27 @@ c = 0.3*3600; %m/s * s/h ;celerity
 D = 10^6; %m^2/h ;hydrodynamic dispersion
 L = 7 * 1000; %km -> m
 
-t = 1:dt:20;
+t = dt:dt:20;
 IUHc = L./(sqrt(4*pi*D).*t.^(3/2)) .* exp((-(L-c*t).^2)./(4*D.*t));
+IUHc = [0, IUHc]; % just because can't divide by zero 
+
 figure 
 area(IUHc,'FaceColor', '#D95319','FaceAlpha', 0.5)
 title("Channel IUH")
+xlabel("Time [h]")
+ylabel("Proportion of unit discharge [mm/h]")
 
 disp("Surface under curve of IUHc: " + sum(IUHc)*dt);
 %% Plot the two iuh in same figure, focus early part
 
 figure
 IUHcx = [IUHc, zeros(1,length(x)-length(IUHc))];
+
 area(x, IUHcx, 'FaceAlpha', 0.5)
 hold on
 area(x, IUHw, 'FaceAlpha', 0.5)
+xlabel("Time [hour]")
+ylabel("??")
 title("Watershed and channel IUH")
 legend("IUHw", "IUHc")
 
@@ -104,8 +113,8 @@ for event = [1,2,3]
     SJei = sum(Jei); %% la quantité total d'eau tombé
     SJei_waited = sum(IUHw)*dt*SJei; %%ce qu'on devrait attendre au vu de l'approximation du IUHw
     SQw = sum(Qwi); %%total de pluie qu'on obtient à la sortie
-    disp("With a IUHw surface of " + sum(IUHw)*dt + " we should get a total water of " + SJei_waited + " but by the convolution we have : " + SQw + " !")
-    disp("Less than " + round(1-SQw/SJei_waited, 3)*100 + "% is lost through convulotion algorithm")
+    disp("A)   With a IUHw surface of " + sum(IUHw)*dt + " we should get a total water of " + SJei_waited + " but by the convolution we have : " + SQw + " !")
+    disp("     Less than " + round(1-SQw/SJei_waited, 5)*100 + "% is lost through this approximations")
 
     figure 
     
@@ -136,8 +145,9 @@ for event = [1,2,3]
     end
 
     SQc = sum(Qci);
-    disp("Surface under Qw :" + SQw + " and under Qc :" + SQc)
-
+    disp("B)   Surface under Qw :" + SQw + " and under Qc :" + SQc)
+    disp("     This is also because surface under IUHc = " + sum(IUHc)*dt)
+    disp("----------")
     %%%% convolution 2 plot to verify 
 
     subplot(2,1,2) 
@@ -161,21 +171,24 @@ for event = [1,2,3]
     %plot(Fa, '-o')
     yyaxis left
     area(Je(:,event),'FaceColor', '#7E2F8E', 'FaceAlpha', 0.7)
-    ylabel('Effectiv Precipitation [mm]')
+    ylabel('Effectiv Precipitation [mm/h]')
     ylim([0,max(Je(:,event))+3])
     ax = gca;
     ax.YDir = "reverse";
     ax.YColor = '#7E2F8E';
+    top = max(Je(:,event));
+    ylim(ax, [0,top+top/2])
+
 
 
     yyaxis right
     area(Qw(:,event),'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
     hold on
     area(Qc(:,event),'FaceColor', '#D95319' ,'FaceAlpha', 0.5)
-    ylabel('Q [mm]')
+    ylabel('Q [mm/h]')
     ax.YColor = '#0072BD';
 
-    xlabel("timestep in " + dt + "[hour]")
+    xlabel("Time [hour]")
     legend(["Je", "Qw", "Qc"])
     title("Convolution of IUHc and Qw of event " + event)
 end

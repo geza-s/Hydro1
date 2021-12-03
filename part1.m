@@ -47,7 +47,7 @@ figure
 bar(Pt)
 title("Cumulative precipitation")
 ylabel('P [mm]')
-xlabel('timestep [hour]')
+xlabel('Timestep [hour]')
 legend(leg)
 %% b) The initial abstraction (Ia [mm]);
 Ia = 0.2 * S;
@@ -82,6 +82,8 @@ legend(leg)
 M = diag(ones([4 1])) + diag(-ones([3 1]),-1);
 I = M * Fa;
 bar(I)
+xlabel("Timestep [hour]")
+ylabel("Intensity [mm/h]")
 title("Infiltration intensity")
 legend(leg)
 %% f) The effective rainfall intensity (Je [mm/h]);
@@ -90,7 +92,8 @@ Je = M * Pet;
 %plot(Je, '-o')
 bar(Je)
 title("Effective rainfall intensity")
-ylabel("Je [mm/h]")
+ylabel("Intensity [mm/h]")
+xlabel("Timestep [hour]")
 legend(leg)
 % -------------------------------------------------------------------------
 %% NB: the CN method uses cumulative fluxes
