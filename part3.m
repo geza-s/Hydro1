@@ -82,9 +82,14 @@ IUHsub = (1/(gammaK * par_scale^par_shape)) .* x.^(par_shape-1) .* exp(-x/par_sc
 %% check IUH
 
 figure
-area(IUHsub,'FaceAlpha', 0.5)
-title("Watershed IUH")
-
+bar(x,IUHsub,'FaceAlpha', 0.5, 'Barwidth', 1)
+hold on;
+bar(x(1:length(IUHw)),IUHw, 'FaceAlpha', 0.5, 'Barwidth', 1)
+title("Watershed IUHs")
+legend("Subsurface IUH", "Surface IUH");
+xlim([0,150])
+xlabel("Time [hour]")
+ylabel("Rate [mm/h]")
 disp("Surface under curve of subsurface IUH: " + sum(IUHsub)*dt);
 
 %% 4.2 convolve with infiltration
@@ -143,30 +148,48 @@ figure
 %legend("Total runoff", "Surface runnoff", "Subsurface runoff")
 %title("Runoffs")
 
-subplot(2,1,1)
+subplot(3,1,[1,2])
 a = bar(t(novI), [Qsub(novI); Qc(novI)], 'stacked', 'Barwidth', 1);
 a(1).FaceColor = '#8B4513';
 a(2).FaceColor = '#0072BD';
 legend("Subsurface portion","Surface portion")
 ylim([0,0.18])
+grid on;
+xlabel("Time");
+ylabel("Rate [mm/h]")
 title("Evolution of the total runoff through November month")
 
-subplot(2,1,2)
-area(t(novI), Qc(novI)./totalQ(novI))
-title("Proportion of surface runoff over total runoff")
+subplot(3,1,3)
+bar(t(novI), Qc(novI)./totalQ(novI),'Barwidth', 1)
+title([" ";"Proportion of surface runoff over total runoff"])
+grid on;
 xlabel("Time")
 ylabel("Proportion")
 
 %% ------------------------------------------------------------------------
-% #6: NOVEMBER FIGURE 
+% #7: COMPUTE FRACTIONS 
 % -------------------------------------------------------------------------
 
 partH = length(totalQ(totalQ>0.2))/length(totalQ);
 partL = length(totalQ(totalQ<0.002))/length(totalQ);
 
 figure
-pie([partL, 1-partH-partL, partH])
-legend("Total discharge < 0.02 mm/h", "0.02 mm/h < total discharge < 0.2 mm/h", "total discharge > 0.2 mm/h", 'Location', 'SouthOutside') 
+
+map = [255,255,189;
+172,255,155;
+89,255,121;
+45,198,127;
+15,121,146;
+0,75,163;
+0,61,178;
+23,49,191;
+114,42,203;
+205,35,214];
+map = map/255;
+
+pie([partL, 1-partH-partL, partH], '%.1f%%')
+colormap(map);
+legend("Total discharge < 0.02 mm/h", "0.02 mm/h < total discharge < 0.2 mm/h", "total discharge > 0.2 mm/h", 'Location', 'EastOutside') 
 title("Fractions of the all the total discharges fluxes")
 
 

@@ -46,16 +46,11 @@ gammaK = integral(fun,0,Inf);
 
 IUHw = (1/(gammaK * par_scale^par_shape)) .* x.^(par_shape-1) .* exp(-x/par_scale);
 
-%IUHw = zeros(1,20);
-%for k = 1:19
-%    IUHw(k) = sum(gammaf(10*k: 10*k + 9))/10;
-%end
-
-figure
-area(x,IUHw,'FaceAlpha', 0.5)
-title("Watershed IUH")
-xlabel("Time [h]")
-ylabel("Proportion of unit discharge [mm/h]") %Important to understand that the values are per hour !!
+%figure
+%bar(x,IUHw,'FaceAlpha', 0.5, 'Barwidth', 1)
+%title("Watershed IUH")
+%xlabel("Time [h]")
+%ylabel("Proportion of unit discharge [mm/h]") %Important to understand that the values are per hour !!
 
 disp("Surface under curve of IUHw: " + sum(IUHw)*dt); %Sum of all the small rectangles 
 
@@ -69,11 +64,11 @@ t = dt:dt:20;
 IUHc = L./(sqrt(4*pi*D).*t.^(3/2)) .* exp((-(L-c*t).^2)./(4*D.*t));
 IUHc = [0, IUHc]; % just because can't divide by zero 
 
-figure 
-area(IUHc,'FaceColor', '#D95319','FaceAlpha', 0.5)
-title("Channel IUH")
-xlabel("Time [h]")
-ylabel("Proportion of unit discharge [mm/h]")
+%figure 
+%bar(IUHc,'FaceColor', '#D95319','FaceAlpha', 0.5, 'Barwidth', 1)
+%title("Channel IUH")
+%xlabel("Time [h]")
+%ylabel("Proportion of unit discharge [mm/h]")
 
 disp("Surface under curve of IUHc: " + sum(IUHc)*dt);
 %% Plot the two iuh in same figure, focus early part
@@ -81,17 +76,21 @@ disp("Surface under curve of IUHc: " + sum(IUHc)*dt);
 figure
 IUHcx = [IUHc, zeros(1,length(x)-length(IUHc))];
 
-area(x, IUHcx, 'FaceAlpha', 0.5)
+bar(x, IUHcx, 'FaceAlpha', 0.5, 'Barwidth', 1)
 hold on
-area(x, IUHw, 'FaceAlpha', 0.5)
-xlabel("Time [hour]")
-ylabel("??")
+bar(x, IUHw, 'FaceAlpha', 0.5, 'Barwidth', 1)
+grid on
+xlabel("time [hour]")
+ylabel("discharge u(t) [mm/h]")
 title("Watershed and channel IUH")
 legend("IUHw", "IUHc")
 
 %% explicit convolution IUHw and Je
 Qw = [];
 Qc = [];
+
+t = 0:dt:1000;
+
 for event = [1,2,3]
     Jei = Je(:,event);
 
@@ -118,14 +117,20 @@ for event = [1,2,3]
 
     figure 
     
-    subplot(2,1,1)
-    
-    area(Qwi,'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
+    subplot(3,1,1)
+
+    bar(t(1:length(Qwi)),Qwi,'FaceColor', '#0072BD' ,'FaceAlpha', 0.5, 'Barwidth', 1)
     hold on
-    area(Jei,'FaceColor', '#7E2F8E', 'FaceAlpha', 0.7)
+    bar(t_Je,Jei,'FaceColor', '#7E2F8E', 'EdgeColor', 'None', 'FaceAlpha', 0.6,'Barwidth', 1)
     hold on
-    area(IUHw,'FaceColor','#EDB120', 'FaceAlpha', 0.8)
-    legend("Qw", "Jei", "IUHw")
+    bar(t(1:length(IUHw)),IUHw,'FaceColor','#EDB120', 'FaceAlpha', 0.8,'Barwidth', 1)
+    grid on;
+    y1 = ylim;
+    xlim([0,25])
+    xticks(0:2:24)
+    xlabel("Time [hour]")
+    ylabel("Rate [mm/h]")
+    legend("Qw", "Je", "IUHw")
     title("Convolution of IUH and Je of event " + event)
 
     %%% Channel IUH convolution
@@ -150,71 +155,108 @@ for event = [1,2,3]
     disp("----------")
     %%%% convolution 2 plot to verify 
 
-    subplot(2,1,2) 
-    area(Qci,'FaceColor', '#D95319' ,'FaceAlpha', 0.5)
+    subplot(3,1,2) 
+    bar(t(1:length(Qci)),Qci,'FaceColor', '#D95319' ,'FaceAlpha', 0.5,'Barwidth', 1)
     hold on
-    area(Qwi,'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
+    bar(t(1:length(Qwi)),Qwi, 'FaceColor', '#0072BD' ,'FaceAlpha', 0.5,'Barwidth', 1)
     hold on
-    area(IUHc,'FaceColor','#EDB120', 'FaceAlpha', 0.8)
+    bar(t(1:length(IUHc)), IUHc,'FaceColor','#EDB120', 'FaceAlpha', 0.8,'Barwidth', 1)
+    grid on;
+    ylim(y1)
+    xlim([0,25])
+    xticks(0:2:24)
+    xlabel("Time [hour]")
+    ylabel("Rate [mm/h]")
+    xlabel("Time [hour]")
     legend("Qc", "Qw", "IUHc")
     title("Convolution of IUHc and Qw of event " + event)
+    
+    subplot(3,1,3)
+    
+    bar(t_Je, Jei,'FaceColor', '#7E2F8E', 'EdgeColor', 'None', 'FaceAlpha', 0.6,'Barwidth', 1);
+    hold on;
+    bar(t(1:length(Qwi)),Qwi,'FaceColor', '#0072BD' ,'FaceAlpha', 0.5,'Barwidth', 1);
+    hold on;
+    bar(t(1:length(Qci)),Qci,'FaceColor', '#D95319' ,'FaceAlpha', 0.5,'Barwidth', 1);
+    grid on
+    ylim(y1)
+    xlim([0,25])
+    xticks(0:2:24)
+    xlabel("Time [hour]")
+    ylabel("Rate [mm/h]")
+    xlabel("Time [hour]")
+    legend("Effective precipitation", "Watershed outlet discharge", "Channel outlet discharge")
+    title("Water discharges from effective precipitation to channel outlet")
+    
     
     %%%saving final data we need
     Qw = [Qw Qwi'];
     Qc = [Qc Qci'];
     
+    
+    
 end
 
-%% test figure Fa PT reversed double plot
+%% Plot only final figure Je, Qw and Qc ! 
 for event = [1,2,3]
     figure
-    %plot(Fa, '-o')
-    yyaxis left
-    area(Je(:,event),'FaceColor', '#7E2F8E', 'FaceAlpha', 0.7)
-    ylabel('Effectiv Precipitation [mm/h]')
-    ylim([0,max(Je(:,event))+3])
-    ax = gca;
-    ax.YDir = "reverse";
-    ax.YColor = '#7E2F8E';
-    top = max(Je(:,event));
-    ylim(ax, [0,top+top/2])
-
-
-
-    yyaxis right
-    area(Qw(:,event),'FaceColor', '#0072BD' ,'FaceAlpha', 0.5)
-    hold on
-    area(Qc(:,event),'FaceColor', '#D95319' ,'FaceAlpha', 0.5)
-    ylabel('Q [mm/h]')
-    ax.YColor = '#0072BD';
-
-    xlabel("Time [hour]")
-    legend(["Je", "Qw", "Qc"])
-    title("Convolution of IUHc and Qw of event " + event)
+    bar(Je(:,event),'FaceColor', '#7E2F8E', 'EdgeColor', 'None', 'FaceAlpha', 0.6,'Barwidth', 1);
+    hold on;
+    bar(Qw(:,event),'FaceColor', '#0072BD' ,'FaceAlpha', 0.5,'Barwidth', 1);
+    hold on;
+    bar(Qc(:,event),'FaceColor', '#D95319' ,'FaceAlpha', 0.5,'Barwidth', 1);
+    grid on
+    xlim([0,300])
+    legend("Effective precipitation", "Watershed outlet discharge", "Channel outlet discharge")
+    title("Event " + event + " discharges from effective precipitaiton to channel outlet")
+    
 end
 
-%% channel maxima's
+%% channel maxima
 
 MaxC = [max(Qc); 0 0 0];
 for i = 1:length(Qc)
    if Qc(i,1) == MaxC(1,1)
        MaxC(2,1) = i*dt;
        disp("Maximal Q of channel for event 1:")
-       disp(MaxC(1,1) + "[mm] after " + MaxC(2,1) + " [hours] ")
+       disp(MaxC(1,1) + "[mm/h] after " + MaxC(2,1) + " [hours] ")
 
    end
    if Qc(i,2) == MaxC(1,2)
        MaxC(2,2) = i*dt;
        disp("Maximal Q of channel for event 2: ")
-       disp(MaxC(1,2) + "[mm] after " + MaxC(2,2) + " [hours]")
+       disp(MaxC(1,2) + "[mm/h] after " + MaxC(2,2) + " [hours]")
    end
    if Qc(i,3) == MaxC(1,3)
        MaxC(2,3) = i*dt;
        disp("Maximal Q of channel for event 3: ")
-       disp(MaxC(1,3) + "[mm] after " + MaxC(2,3) + " [hours]")
+       disp(MaxC(1,3) + "[mm/h] after " + MaxC(2,3) + " [hours]")
    end
    
 end
+%% Watershed maxima
+
+MaxW = [max(Qw); 0 0 0];
+for i = 1:length(Qw)
+   if Qw(i,1) == MaxW(1,1)
+       MaxW(2,1) = i*dt;
+       disp("Maximal Q of watershed for event 1:")
+       disp(MaxW(1,1) + "[mm/h] after " + MaxW(2,1) + " [hours] ")
+
+   end
+   if Qw(i,2) == MaxW(1,2)
+       MaxW(2,2) = i*dt;
+       disp("Maximal Q of watershed for event 2: ")
+       disp(MaxW(1,2) + "[mm/h] after " + MaxW(2,2) + " [hours]")
+   end
+   if Qw(i,3) == MaxW(1,3)
+       MaxW(2,3) = i*dt;
+       disp("Maximal Q of watershed for event 3: ")
+       disp(MaxW(1,3) + "[mm/h] after " + MaxW(2,3) + " [hours]")
+   end
+   
+end
+
 
 %% saving results
 

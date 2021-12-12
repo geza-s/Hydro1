@@ -96,7 +96,74 @@ ylabel("Intensity [mm/h]")
 xlabel("Timestep [hour]")
 legend(leg)
 % -------------------------------------------------------------------------
-%% NB: the CN method uses cumulative fluxes
+%% Plotting together 
+ti = 1:4;
+
+figure 
+
+h1 = subplot(2,3,1);
+a = bar(ti, [I(:,1)'; Je(:,1)'], 'stacked', 'Barwidth', 1);
+a(1).FaceColor = '#8B4513';
+a(2).FaceColor = '#0072BD';
+hold on 
+grid on
+plot(events(:,1), 'o', 'Linewidth', 3)
+xlabel("Timestep [hour]")
+ylim([0,20])
+ylabel("intensity [mm/h]")
+title("Event 1")
+
+h2 = subplot(2,3,2);
+a = bar(ti, [I(:,2)'; Je(:,2)'], 'stacked', 'Barwidth', 1);
+a(1).FaceColor = '#8B4513';
+a(2).FaceColor = '#0072BD';
+hold on 
+grid on
+plot(events(:,2), 'o' ,'Linewidth', 3)
+xlabel("Timestep [hour]")
+ylim([0,20])
+ylabel("intensity [mm/h]")
+%lgd = legend("Infiltration intensity portion", "Effective Precipitation intensity portion", "Rainfall Intensity", "Location", "southoutside" );
+title("Event 2")
+
+h3 = subplot(2,3,3);
+a = bar(ti, [I(:,3)'; Je(:,3)'], 'stacked', 'Barwidth', 1);
+a(1).FaceColor = '#8B4513';
+a(2).FaceColor = '#0072BD';
+hold on 
+grid on
+plot(events(:,3), 'o', 'Linewidth', 3)
+%stairs(events(:,3))
+lgd = legend("Infiltration intensity portion", "Effective Precipitation intensity portion", "Rainfall Intensity" );
+xlabel("Timestep [hour]")
+ylim([0,20])
+ylabel("intensity [mm/h]")
+title("Event 3")
+
+hL = subplot(2,3,4.5);
+poshL = get(hL,'position');     % Getting its position
+posfinal = [poshL(1) + poshL(3), poshL(2) + poshL(4)/1.5, poshL(3)/2, poshL(4)/2];
+set(lgd,'position', posfinal);      % Adjusting legend's position
+axis(hL,'off');                 % Turning its axis off
+
+%% Compute the total effective precipitation for each event 
+%NB : events are in mm/h, therefore cumulative is in mm
+
+figure
+b = bar(Pet(4,:));
+grid on;
+xtips1 = b(1).XEndPoints;
+ytips1 = b(1).YEndPoints;
+labels1 = string(round(b(1).YData,1));
+text(xtips1,ytips1,labels1,'HorizontalAlignment','center',...
+    'VerticalAlignment','bottom')
+
+title("Total effective precipitation for each event")
+xticklabels({'Event 1', 'Event 2', 'Event 3'})
+ylabel("Cumulated precipitaiton [mm]")
+
+
+%% Saving the output necessery for part2
 J = events;
 save("output_part1.mat", "J", "Je", "I") 
 
